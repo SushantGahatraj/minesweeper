@@ -165,7 +165,8 @@ while running:
                 if event.key == pygame.K_SPACE:
                 # 1. Get the tile under the mouse
                  mx, my = pygame.mouse.get_pos()
-                c, r = mx // TILE_SIZE, my // TILE_SIZE
+                c = mx // TITLE_SIZE
+                r = (my - HEADER_HEIGHT) // TITLE_SIZE 
                     
                 # Safety check: make sure mouse is inside the grid
                 if 0 <= r < ROWS and 0 <= c < COLS:
