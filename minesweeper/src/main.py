@@ -62,6 +62,7 @@ all_spots = [(r, c) for r in range(ROWS) for c in range(COLS)]
 for r, c in random.sample(all_spots, 15):
     grid[r][c].is_mine = True
 
+first_click = True
 running = True
 
 def calculate_numbers(grid):
