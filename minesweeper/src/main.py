@@ -87,8 +87,14 @@ def reveal_empty_tiles(grid, r,c):
             if not tile.is_mine and not tile.is_flagged and not tile.is_revealed:
                 tile.is_revealed = True
                 #3. RECURSION : If this neighbour is ALSO empty (0), check its neighbors too!
-                if tile.adjacent_mine == 0:
+                if tile.adjacent_mines == 0:
                     reveal_empty_tiles(grid,i,j)
+
+def place_mines(grid, start_r, start_c):
+    possible_spots = [(r,c) for r in range(ROWS) for c in range(COLS) if (r,c) != (start_r, start_c)]
+    for r, c in random.sample(possible_spots, 15):
+        grid[r][c].is_name = True
+        calculate_numbers(grid)
 
 
 while running:
@@ -112,6 +118,11 @@ while running:
 
             if event.button == 1:  # Left Click
                     if not tile.is_flagged and not tile.is_revealed:
+                        #First click should never be mine
+                        if first_click:
+                            place_mines(grid, r, c) 
+                            first_click = False
+
                         tile.is_revealed = True
                         
                         if tile.is_mine:
@@ -122,7 +133,7 @@ while running:
                             #If the tile is empty, start the chain reaction!
                             reveal_empty_tiles(grid,r,c)
 
-                            
+                    
                             if lives <= 0:
                                 print("GAME OVER! You ran out of lives.")
                                 # REVEAL ALL MINES so the player sees where they were
