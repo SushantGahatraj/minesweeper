@@ -10,11 +10,25 @@ def get_asset_path(filename: str) -> str:
     return os.path.join(GAME_PATH, "assets", filename)
 
 # Initialize Pygame
-pygame.init()
+pygame.init().
 SCREEN_SIZE = 400
 screen = pygame.display.set_mode((SCREEN_SIZE, SCREEN_SIZE))
 pygame.display.set_caption("Chain Reaction Minesweeper")
 
+#Game Settings
+ROWS, COLS = 10,10
+TITLE_SIZE = 40
+HEADER_HEIGHT = COLS * TITLE_SIZE
+SCREEN_WIDTH = COLS * TITLE_SIZE
+SCREEN_HEIGHT = (ROWS * TITLE_SIZE) + HEADER_HEIGHT
+
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("Chain Reaction Minesweeper")
+
+#Initalize Stats
+score = 0
+lives = 3
+start_ticks = pygame.time.get_ticks()
 class Tile: #Creating a Tile class
     def __init__(self, x, y, size):
         self.rect = pygame.Rect(x * size, y * size, size, size)
