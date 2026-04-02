@@ -91,9 +91,6 @@ def reveal_empty_tiles(grid, r,c):
                     reveal_empty_tiles(grid,i,j)
 
 
-
-
-
 while running:
     screen.fill((0, 0, 0)) # Clear screen with black
     
@@ -120,6 +117,11 @@ while running:
                         if tile.is_mine:
                             lives -= 1
                             print(f"BOOM! You hit a mine. Lives left: {lives}")
+
+                        elif tile.adjacent_mines == 0:
+                            #If the tile is empty, start the chain reaction!
+                            reveal_empty_tiles(grid,r,c)
+
                             
                             if lives <= 0:
                                 print("GAME OVER! You ran out of lives.")
@@ -128,6 +130,7 @@ while running:
                                     for t in row:
                                         if t.is_mine:
                                             t.is_revealed = True
+
 
             
             elif event.button == 3: # Right Click (FLAG)
