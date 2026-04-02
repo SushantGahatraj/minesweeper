@@ -57,10 +57,6 @@ TILE_SIZE = 40
 grid = [[Tile(c, r, TILE_SIZE) for c in range(COLS)] for r in range(ROWS)]
 lives = 3 # Your specific twist rule
 
-# Pick 15 random spots and turn 'is_mine' to True
-all_spots = [(r, c) for r in range(ROWS) for c in range(COLS)]
-for r, c in random.sample(all_spots, 15):
-    grid[r][c].is_mine = True
 
 first_click = True
 running = True
@@ -94,7 +90,7 @@ def reveal_empty_tiles(grid, r,c):
 def place_mines(grid, start_r, start_c):
     possible_spots = [(r,c) for r in range(ROWS) for c in range(COLS) if (r,c) != (start_r, start_c)]
     for r, c in random.sample(possible_spots, 15):
-        grid[r][c].is_name = True
+        grid[r][c].is_mine = True
         calculate_numbers(grid)
 
 
@@ -135,12 +131,12 @@ while running:
                             reveal_empty_tiles(grid,r,c)
 
                     
-                            if lives <= 0:
-                                print("GAME OVER! You ran out of lives.")
+                        if lives <= 0:
+                            print("GAME OVER! You ran out of lives.")
                                 # REVEAL ALL MINES so the player sees where they were
-                                for row in grid:
-                                    for t in row:
-                                        if t.is_mine:
+                            for row in grid:
+                                for t in row:
+                                    if t.is_mine:
                                             t.is_revealed = True
 
 
@@ -149,30 +145,29 @@ while running:
                 if not tile.is_revealed:
                     tile.is_flagged = not tile.is_flagged
 
-        # Adding Spacebar Detonation logic here
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
+            # Adding Spacebar Detonation logic here
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
                 # 1. Get the tile under the mouse
-                mx, my = pygame.mouse.get_pos()
+                 mx, my = pygame.mouse.get_pos()
                 c, r = mx // TILE_SIZE, my // TILE_SIZE
-                
+                    
                 # Safety check: make sure mouse is inside the grid
                 if 0 <= r < ROWS and 0 <= c < COLS:
-                    target_tile = grid[r][c]
-                    
-                    # 2. Only work if the player successfully FLAGGED a MINE
-                    if target_tile.is_flagged and target_tile.is_mine:
-                        print("Successful Detonation! Chain Reaction!")
+                        target_tile = grid[r][c]
                         
-                        # 3. The 3x3 Loop: Reveal neighbors
-                        for i in range(max(0, r-1), min(ROWS, r+2)):
-                            for j in range(max(0, c-1), min(COLS, c+2)):
-                                grid[i][j].is_revealed = True
-                    
-                    # 4. Penalty: If they detonated a wrong flag
-                    elif target_tile.is_flagged and not target_tile.is_mine:
-                        lives -= 1
-                        print(f"Misfire! That wasn't a mine. Lives: {lives}")
+                    # 2. Only work if the player successfully FLAGGED a MINE
+                        if target_tile.is_flagged and target_tile.is_mine:
+                            print("Successful Detonation! Chain Reaction!")
+                             # 3. The 3x3 Loop: Reveal neighbors
+                            for i in range(max(0, r-1), min(ROWS, r+2)):
+                                for j in range(max(0, c-1), min(COLS, c+2)):
+                                    grid[i][j].is_revealed = True
+                        
+            # 4. Penalty: If they detonated a wrong flag
+                        elif target_tile.is_flagged and not target_tile.is_mine:
+                            lives -= 1
+                            print(f"Misfire! That wasn't a mine. Lives: {lives}")
 
     # Draw the grid
     for row in grid:
