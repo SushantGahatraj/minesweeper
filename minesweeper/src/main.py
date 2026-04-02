@@ -156,5 +156,3 @@ while running:
 
 pygame.quit()
 
-
-# sushant gahatraj
