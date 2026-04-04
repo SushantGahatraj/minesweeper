@@ -1,6 +1,16 @@
 import pygame
 import os
 import random
+import sys
+
+#Game Settings
+ROWS, COLS = 10,10
+TITLE_SIZE = 40
+HEADER_HEIGHT = 50
+SCREEN_WIDTH = COLS * TITLE_SIZE
+SCREEN_HEIGHT = ROWS * TITLE_SIZE + HEADER_HEIGHT
+MINE_COUNT = 15
+START_LIVES = 3
 
 # Mandatory path handling from project instructions 
 GAME_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -15,12 +25,7 @@ SCREEN_SIZE = 400
 screen = pygame.display.set_mode((SCREEN_SIZE, SCREEN_SIZE))
 pygame.display.set_caption("Chain Reaction Minesweeper")
 
-#Game Settings
-ROWS, COLS = 10,10
-TITLE_SIZE = 40
-HEADER_HEIGHT = 50
-SCREEN_WIDTH = COLS * TITLE_SIZE
-SCREEN_HEIGHT = ROWS * TITLE_SIZE + HEADER_HEIGHT
+
 
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
