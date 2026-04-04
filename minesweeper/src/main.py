@@ -122,15 +122,9 @@ while running:
         
         # Add your Right-Click Flagging logic here
         if event.type == pygame.MOUSEBUTTONDOWN:
-            # 1. Get the pixel position of the click
-            mouse_x, mouse_y = event.pos
-            
-            # 2. Convert pixels to Grid Coordinates (0 to 9)
-            # If you click at x=85, 85 // 40 = Column 2
-            c, r = mouse_x // TILE_SIZE, mouse_y // TILE_SIZE
-            
-            # 3. Get the specific Tile object from our 2D list
-            tile = grid[r][c]
+            mx, my = event.pos
+            c = mx // TITLE_SIZE
+            r = (my - HEADER_HEIGHT) // TITLE_SIZE #udjusting the mouse postiion to account for header height
 
             if event.button == 1:  # Left Click
                     if not tile.is_flagged and not tile.is_revealed:
@@ -165,29 +159,37 @@ while running:
                     tile.is_flagged = not tile.is_flagged
 
             # Adding Spacebar Detonation logic here
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                # 1. Get the tile under the mouse
-                 mx, my = pygame.mouse.get_pos()
-                c = mx // TITLE_SIZE
-                r = (my - HEADER_HEIGHT) // TITLE_SIZE 
-                    
-                # Safety check: make sure mouse is inside the grid
+            # --- STEP 4: DETONATION LOGIC ---
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                # 1. Get mouse position and subtract the header
+                mx, my = pygame.mouse.get_pos()
+                c = mx // TILE_SIZE  # Ensure this is TILE_SIZE, not TITLE_SIZE
+                r = (my - HEADER_HEIGHT) // TILE_SIZE 
+                
+                # 2. Check if we are inside the grid
                 if 0 <= r < ROWS and 0 <= c < COLS:
-                        target_tile = grid[r][c]
+                    target_tile = grid[r][c]
+                    
+                    # 3. SUCCESS: Detonate correctly flagged mines
+                    if target_tile.is_flagged and target_tile.is_mine:
+                        print("Successful Detonation! Chain Reaction!")
+                        score += 50  # Add a points bonus from the Final Code
                         
-                    # 2. Only work if the player successfully FLAGGED a MINE
-                        if target_tile.is_flagged and target_tile.is_mine:
-                            print("Successful Detonation! Chain Reaction!")
-                             # 3. The 3x3 Loop: Reveal neighbors
-                            for i in range(max(0, r-1), min(ROWS, r+2)):
-                                for j in range(max(0, c-1), min(COLS, c+2)):
+                        # The 3x3 Loop: Reveal every neighbor safely
+                        for i in range(max(0, r-1), min(ROWS, r+2)):
+                            for j in range(max(0, c-1), min(COLS, c+2)):
+                                if not grid[i][j].is_revealed:
                                     grid[i][j].is_revealed = True
+                                    score += 10 # Extra points for chain reveals
                         
-            # 4. Penalty: If they detonated a wrong flag
-                        elif target_tile.is_flagged and not target_tile.is_mine:
-                            lives -= 1
-                            print(f"Misfire! That wasn't a mine. Lives: {lives}")
+                        # Remove the flag after detonation
+                        target_tile.is_flagged = False
+
+                    # 4. PENALTY: Detonating a fake flag
+                    elif target_tile.is_flagged and not target_tile.is_mine:
+                        lives -= 1
+                        print(f"Misfire! Lives: {lives}")
 
     # Draw the grid
     for row in grid:
