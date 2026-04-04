@@ -112,6 +112,15 @@ def place_mines(grid, start_r, start_c):
         grid[r][c].is_mine = True
         calculate_numbers(grid)
 
+def trigger_game_over():
+    global running
+    print(f'GAME OVER! Final Score: {score}')
+    for row in grid:
+        for row in grid:
+            for t in row:
+                if t.is_mine:
+                    t.is_revealed = True # Reveal all mines at game over
+
 
 while running:
     screen.fill((0, 0, 0)) # Clear screen with black
