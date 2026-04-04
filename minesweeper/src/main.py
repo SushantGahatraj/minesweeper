@@ -199,6 +199,17 @@ while running:
     life_text = font.render(f"LIVES: {lives}", True, (255, 0, 0))
     # Position it at the top left (or wherever fits your screen)
     screen.blit(life_text, (10, 10))
+
+    pygame.draw.rect(screen, (0,0,0), (0,0, SCREEN_WIDTH, HEADER_HEIGHT)) # Clear header area with black
+
+    elapsed = (pygame.time.get_ticks() - start_ticks) // 1000 if not first_click else 0 #Calculate time
+
+    font = pygame.font.SysFont("Arial", 18, bold=True)
+    stats_str = f"LIVES: {lives}  SCORE: {score}  TIME:elapsed {elapsed}s"
+    text_surf = font.render(stats_str, True, (255, 255, 255))
+    screen.blit(text_surf, (10, (HEADER_HEIGHT - text_surf.get_height()) // 2)) # Center text vertically in header
+
+
     pygame.display.flip()
 
 pygame.quit()
