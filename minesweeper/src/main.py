@@ -19,11 +19,13 @@ pygame.display.set_caption("Chain Reaction Minesweeper")
 ROWS, COLS = 10,10
 TITLE_SIZE = 40
 HEADER_HEIGHT = 50
-SCREEN_WIDTH = 400
-SCREEN_HEIGHT = 400 + HEADER_HEIGHT
+SCREEN_WIDTH = COLS * TITLE_SIZE
+SCREEN_HEIGHT = ROWS * TITLE_SIZE + HEADER_HEIGHT
 
+pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Chain Reaction Minesweeper")
+clock = pygame.time.Clock()
 
 #Initalize Stats
 score = 0
