@@ -33,8 +33,10 @@ lives = 3
 start_ticks = pygame.time.get_ticks()
 
 class Tile: #Creating a Tile class
-    def __init__(self, x, y, size):
-        self.rect = pygame.Rect(x * size, (y * size) + HEADER_HEIGHT, size, size)
+    def __init__(self, row, col, size):
+        self.row = row
+        self.col = col
+        self.rect = pygame.Rect(col * size, (row * size) + HEADER_HEIGHT, size, size)
         self.is_mine = False
         self.is_revealed = False
         self.is_flagged = False
