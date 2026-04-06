@@ -5,10 +5,10 @@ import sys
 
 #Game Settings
 ROWS, COLS = 10,10
-TITLE_SIZE = 40
+TILE_SIZE = 40
 HEADER_HEIGHT = 50
-SCREEN_WIDTH = COLS * TITLE_SIZE
-SCREEN_HEIGHT = ROWS * TITLE_SIZE + HEADER_HEIGHT
+SCREEN_WIDTH = COLS * TILE_SIZE
+SCREEN_HEIGHT = ROWS * TILE_SIZE + HEADER_HEIGHT
 MINE_COUNT = 15
 START_LIVES = 3
 
@@ -20,13 +20,6 @@ def get_asset_path(filename: str) -> str:
     return os.path.join(GAME_PATH, "assets", filename)
 
 # Initialize Pygame
-pygame.init()
-SCREEN_SIZE = 400
-screen = pygame.display.set_mode((SCREEN_SIZE, SCREEN_SIZE))
-pygame.display.set_caption("Chain Reaction Minesweeper")
-
-
-
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Chain Reaction Minesweeper")
@@ -137,8 +130,8 @@ while running:
         # Add your Right-Click Flagging logic here
         if event.type == pygame.MOUSEBUTTONDOWN:
             mx, my = event.pos
-            c = mx // TITLE_SIZE
-            r = (my - HEADER_HEIGHT) // TITLE_SIZE #udjusting the mouse postiion to account for header height
+            c = mx // TILE_SIZE
+            r = (my - HEADER_HEIGHT) // TILE_SIZE #udjusting the mouse postiion to account for header height
 
             if event.button == 1:  # Left Click
                     if not tile.is_flagged and not tile.is_revealed:
@@ -178,7 +171,7 @@ while running:
             if event.key == pygame.K_SPACE:
                 # 1. Get mouse position and subtract the header
                 mx, my = pygame.mouse.get_pos()
-                c = mx // TILE_SIZE  # Ensure this is TILE_SIZE, not TITLE_SIZE
+                c = mx // TILE_SIZE  
                 r = (my - HEADER_HEIGHT) // TILE_SIZE 
                 
                 # 2. Check if we are inside the grid
