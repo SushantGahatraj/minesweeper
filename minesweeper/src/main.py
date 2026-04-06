@@ -94,17 +94,29 @@ def calculate_numbers(grid):
             grid[r][c].adjacent_mines = count
 
 def reveal_empty_tiles(grid, r,c):
-    '''Reveals the surrounding tiles automatically if the current one is empty (0).'''
-    #1. Loop through all 8 neighbors
-    for i in range(max(0,r-1),min(ROWS, r+2)):
-        for j in range(max(0,c-1), min(COLS, c+2)):
-            tile = grid[i][j]
-            #2. Only reveal if it's not a mine, not flagged, and not already revealed
-            if not tile.is_mine and not tile.is_flagged and not tile.is_revealed:
-                tile.is_revealed = True
-                #3. RECURSION : If this neighbour is ALSO empty (0), check its neighbors too!
-                if tile.adjacent_mines == 0:
-                    reveal_empty_tiles(grid,i,j)
+    stack = [(r,c)]
+    visited = set()
+
+    while stack:    
+        cr, cc = stack.pop()
+        if (cr, cc) in visited:
+            continue
+        visited.add((cr, cc))
+        tile = grid[cr][cc]
+
+        if tile.is_mine or tile.is_flagged:
+            continue
+
+        tile.is_revealed = True
+
+        if tile.adjacent_mines == 0:
+            for i in range(cr - 1, cr + 2):
+                for j in range(cc - 1, cc + 2):
+                    if 0 <= i < ROWS and 0 <= j < COLS:
+                        stack.append((i, j))
+        
+
+        
 
 def place_mines(grid, start_r, start_c):
     possible_spots = [(r,c) for r in range(ROWS) for c in range(COLS) if (r,c) != (start_r, start_c)]
