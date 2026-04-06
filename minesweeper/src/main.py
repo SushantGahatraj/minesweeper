@@ -80,6 +80,9 @@ lives = 3 # Your specific twist rule
 first_click = True
 running = True
 
+def in_bounds(r, c):
+    return 0 <= r < ROWS and 0 <= c < COLS
+
 def calculate_numbers(grid):
     for r in range(ROWS):
         for c in range(COLS):
@@ -107,23 +110,55 @@ def reveal_empty_tiles(grid, r,c):
         if tile.is_mine or tile.is_flagged:
             continue
 
-        tile.is_revealed = True
+        if not tile.is_revealed:
+            tile.is_revealed = True
 
         if tile.adjacent_mines == 0:
             for i in range(cr - 1, cr + 2):
                 for j in range(cc - 1, cc + 2):
-                    if 0 <= i < ROWS and 0 <= j < COLS:
+                    if in_bounds(i,j) and (i,j) not in visited:
                         stack.append((i, j))
-        
-
-        
+               
 
 def place_mines(grid, start_r, start_c):
-    possible_spots = [(r,c) for r in range(ROWS) for c in range(COLS) if (r,c) != (start_r, start_c)]
-    for r, c in random.sample(possible_spots, 15):
-        grid[r][c].is_mine = True
-        calculate_numbers(grid)
+    excluded = {(start_r, start_c)}
+    for i in range(start_r - 1, start_r + 2):
+       for j in range(start_c - 1, start_c + 2):
+           if in_bounds(i, j):
+               excluded.add((i, j))
 
+    possible = [(r, c) for r in range(ROWS) for c in range(COLS) if (r, c) not in excluded]
+    mine_count = min(MINE_COUNT, len(possible))
+    max_attempts = 100
+    for attempt in range(max_attempts):
+       # clear any previous mines
+       for r in range(ROWS):
+           for c in range(COLS):
+               grid[r][c].is_mine = False
+
+       random.shuffle(possible)
+       placed = 0
+       for r, c in possible:
+           if placed >= mine_count:
+               break
+           # check adjacency: skip if any neighbor already has a mine
+           ok = True
+           for i in range(r - 1, r + 2):
+               for j in range(c - 1, c + 2):
+                      if in_bounds(i, j) and grid[i][j].is_mine:
+                       ok = False
+                       break
+               if not ok:
+                   break
+           if not ok:
+               continue
+           grid[r][c].is_mine = True
+           placed += 1
+
+
+       if placed >= mine_count:
+           break
+     
 def trigger_game_over():
     global running
     print(f'GAME OVER! Final Score: {score}')
