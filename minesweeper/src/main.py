@@ -71,7 +71,7 @@ class Tile: #Creating a Tile class
 # Game Settings
 ROWS, COLS = 10, 10
 TILE_SIZE = 40
-grid = [[Tile(c, r, TILE_SIZE) for c in range(COLS)] for r in range(ROWS)]
+grid = [[Tile(r, c, TILE_SIZE) for c in range(COLS)] for r in range(ROWS)]
 lives = 3 # Your specific twist rule
 
 
@@ -114,8 +114,7 @@ def trigger_game_over():
     global running
     print(f'GAME OVER! Final Score: {score}')
     for row in grid:
-        for row in grid:
-            for t in row:
+        for t in row:
                 if t.is_mine:
                     t.is_revealed = True # Reveal all mines at game over
 
@@ -132,6 +131,11 @@ while running:
             mx, my = event.pos
             c = mx // TILE_SIZE
             r = (my - HEADER_HEIGHT) // TILE_SIZE #udjusting the mouse postiion to account for header height
+
+            if 0 <= r < ROWS and 0 <= c < COLS:
+                tile = grid[r][c]
+            else:
+                continue
 
             if event.button == 1:  # Left Click
                     if not tile.is_flagged and not tile.is_revealed:
