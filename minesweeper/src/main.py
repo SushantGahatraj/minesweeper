@@ -145,6 +145,8 @@ while running:
                         if first_click:
                             place_mines(grid, r, c) 
                             first_click = False
+                            start_ticks = pygame.time.get_ticks()
+
 
                         tile.is_revealed = True
                         
@@ -215,7 +217,12 @@ while running:
 
     pygame.draw.rect(screen, (0,0,0), (0,0, SCREEN_WIDTH, HEADER_HEIGHT)) # Clear header area with black
 
-    elapsed = (pygame.time.get_ticks() - start_ticks) // 1000 if not first_click else 0 #Calculate time
+    elapsed = 0
+    if start_ticks:
+        if game_over and end_ticks:
+            elapsed = (end_ticks - start_ticks) // 1000
+        else:
+            elapsed = (pygame.time.get_ticks() - start_ticks) // 1000
 
     font = pygame.font.SysFont("Arial", 18, bold=True)
     stats_str = f"LIVES: {lives}  SCORE: {score}  TIME:elapsed {elapsed}s"
