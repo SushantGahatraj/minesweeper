@@ -27,8 +27,10 @@ clock = pygame.time.Clock()
 
 #Initalize Stats
 score = 0
-lives = 3
-start_ticks = pygame.time.get_ticks()
+lives = START_LIVES
+start_ticks = None # Will be set on first click to start the timer
+end_ticks = None #used to stop timer on game over
+game_over = False #tracks if game ended
 
 class Tile: #Creating a Tile class
     def __init__(self, row, col, size):
