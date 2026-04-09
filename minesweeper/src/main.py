@@ -175,7 +175,16 @@ def trigger_game_over():
 def count_mines_remaining():
     return sum(1 for row in grid for t in row if t.is_mine and not (t.is_revealed or t.is_flagged))
 
-
+def reset_game():
+    global grid, score, lives, start_ticks, end_ticks, game_over, first_click
+    grid = [[Tile(r, c, TILE_SIZE) for c in range(COLS)] for r in range(ROWS)]
+    score = 0
+    lives = START_LIVES
+    start_ticks = None
+    end_ticks = None
+    game_over = False
+    first_click = True
+    
 while running:
     screen.fill((0, 0, 0)) # Clear screen with black
     
