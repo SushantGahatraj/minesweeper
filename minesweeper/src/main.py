@@ -184,15 +184,20 @@ def reset_game():
     end_ticks = None
     game_over = False
     first_click = True
-    
+
 while running:
     screen.fill((0, 0, 0)) # Clear screen with black
     
     for event in pygame.event.get():
-        if game_over:
-         continue
         if event.type == pygame.QUIT:
             running = False
+        if game_over:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r:
+                    reset_game()
+                if event.key in (pygame.K_q, pygame.K_ESCAPE):
+                    running = False
+            continue  # Skip the rest of the loop if game is over
         
         # Add your Right-Click Flagging logic here
         if event.type == pygame.MOUSEBUTTONDOWN:
