@@ -74,7 +74,7 @@ class Tile: #Creating a Tile class
 ROWS, COLS = 10, 10
 TILE_SIZE = 40
 grid = [[Tile(r, c, TILE_SIZE) for c in range(COLS)] for r in range(ROWS)]
-lives = 3 # Your specific twist rule
+
 
 
 first_click = True
@@ -83,7 +83,7 @@ running = True
 def in_bounds(r, c):
     return 0 <= r < ROWS and 0 <= c < COLS
 
-def calculate_numbers(grid):
+def calculate_numbers():
     for r in range(ROWS):
         for c in range(COLS):
             if grid[r][c].is_mine:
@@ -96,7 +96,7 @@ def calculate_numbers(grid):
                         count += 1
             grid[r][c].adjacent_mines = count
 
-def reveal_empty_tiles(grid, r,c):
+def reveal_empty_tiles(r,c):
     stack = [(r,c)]
     visited = set()
 
@@ -120,7 +120,7 @@ def reveal_empty_tiles(grid, r,c):
                         stack.append((i, j))
                
 
-def place_mines(grid, start_r, start_c):
+def place_mines(start_r, start_c):
     excluded = {(start_r, start_c)}
     for i in range(start_r - 1, start_r + 2):
        for j in range(start_c - 1, start_c + 2):
@@ -158,6 +158,7 @@ def place_mines(grid, start_r, start_c):
 
        if placed >= mine_count:
            break
+       calculate_numbers(grid)
      
 def trigger_game_over():
     global running
@@ -167,11 +168,16 @@ def trigger_game_over():
                 if t.is_mine:
                     t.is_revealed = True # Reveal all mines at game over
 
+def count_mines_remaining():
+    return sum(1 for row in grid for t in row if t.is_mine and not (t.is_revealed or t.is_flagged))
+
 
 while running:
     screen.fill((0, 0, 0)) # Clear screen with black
     
     for event in pygame.event.get():
+        if game_over:
+         continue
         if event.type == pygame.QUIT:
             running = False
         
@@ -207,12 +213,13 @@ while running:
 
                     
                         if lives <= 0:
-                            print("GAME OVER! You ran out of lives.")
-                                # REVEAL ALL MINES so the player sees where they were
-                            for row in grid:
-                                for t in row:
-                                    if t.is_mine:
-                                            t.is_revealed = True
+                         game_over = True
+                        end_ticks = pygame.time.get_ticks()
+
+                        for row in grid:
+                            for t in row:
+                                if t.is_mine:
+                                    t.is_revealed = True
 
 
             
@@ -270,6 +277,7 @@ while running:
             elapsed = (end_ticks - start_ticks) // 1000
         else:
             elapsed = (pygame.time.get_ticks() - start_ticks) // 1000
+    mines_left = count_mines_remaining()
 
     font = pygame.font.SysFont("Arial", 18, bold=True)
     stats_str = f"LIVES: {lives}  SCORE: {score}  TIME:elapsed {elapsed}s"
