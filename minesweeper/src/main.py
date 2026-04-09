@@ -262,25 +262,27 @@ while running:
                     target_tile = grid[r][c]
                     
                     # 3. SUCCESS: Detonate correctly flagged mines
-                    if target_tile.is_flagged and target_tile.is_mine:
-                        print("Successful Detonation! Chain Reaction!")
-                        score += 50  # Add a points bonus from the Final Code
-                        
-                        # The 3x3 Loop: Reveal every neighbor safely
-                        for i in range(max(0, r-1), min(ROWS, r+2)):
-                            for j in range(max(0, c-1), min(COLS, c+2)):
-                                if not grid[i][j].is_revealed:
-                                    grid[i][j].is_revealed = True
-                                    score += 10 # Extra points for chain reveals
-                        
-                        # Remove the flag after detonation
-                        target_tile.is_flagged = False
-
-                    # 4. PENALTY: Detonating a fake flag
-                    elif target_tile.is_flagged and not target_tile.is_mine:
-                        lives -= 1
-                        print(f"Misfire! Lives: {lives}")
-
+                if tile.is_mine and not tile.is_revealed:
+                    score += 1   # +1 for the mine itself
+                    for i in range(r - 1, r + 2):
+                        for j in range(c - 1, c + 2):
+                            if in_bounds(i, j):
+                                t = grid[i][j]
+                                if not t.is_revealed and not t.is_mine:
+                                    score += 1
+                                    t.is_revealed = True
+                                    t.is_flagged  = False
+                    tile.is_flagged  = False
+                    tile.is_revealed = True   # reveal the mine too
+                else:
+                    if first_click:   # mines not placed yet — ignore
+                        continue
+                    lives -= 1
+                    if tile.is_flagged:
+                        tile.is_flagged = False
+                    if lives <= 0:
+                        trigger_game_over()
+                    
     # Draw the grid
     for row in grid:
         for tile in row:
