@@ -224,10 +224,13 @@ while running:
                         if tile.is_mine:
                             lives -= 1
                             print(f"BOOM! You hit a mine. Lives left: {lives}")
+                            if lives <= 0:
+                                trigger_game_over()
 
-                        elif tile.adjacent_mines == 0:
-                            #If the tile is empty, start the chain reaction!
-                            reveal_empty_tiles(grid,r,c)
+                        else:
+                            score += 1 # +1 for every safe reveal
+                            if tile.adjacent_mines == 0:
+                                reveal_empty_tiles(r, c)
 
                     
                         if lives <= 0:
