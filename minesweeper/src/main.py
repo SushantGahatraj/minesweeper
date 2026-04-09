@@ -161,12 +161,16 @@ def place_mines(start_r, start_c):
        calculate_numbers(grid)
      
 def trigger_game_over():
-    global running
-    print(f'GAME OVER! Final Score: {score}')
+    global game_over, end_ticks
     for row in grid:
         for t in row:
+            if t in row:
                 if t.is_mine:
-                    t.is_revealed = True # Reveal all mines at game over
+                    t.is_revealed = True
+    game_over = True
+    if end_ticks is None and start_ticks is not None:
+        end_ticks = pygame.time.get_ticks()            
+
 
 def count_mines_remaining():
     return sum(1 for row in grid for t in row if t.is_mine and not (t.is_revealed or t.is_flagged))
