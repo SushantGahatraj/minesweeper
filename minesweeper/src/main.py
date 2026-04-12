@@ -158,7 +158,7 @@ def place_mines(start_r, start_c):
 
        if placed >= mine_count:
            break
-       calculate_numbers(grid)
+       calculate_numbers()
      
 def trigger_game_over():
     global game_over, end_ticks
