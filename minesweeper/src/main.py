@@ -11,6 +11,14 @@ SCREEN_WIDTH = COLS * TILE_SIZE
 SCREEN_HEIGHT = ROWS * TILE_SIZE + HEADER_HEIGHT
 MINE_COUNT = 15
 START_LIVES = 3
+COLOR_HIDDEN      = (180, 180, 180)
+COLOR_REVEALED    = (20,  20,  20 )
+COLOR_BORDER      = (80,  80,  80 )
+COLOR_MINE        = (255, 0,   0  )
+COLOR_FLAG        = (255, 165, 0  )
+COLOR_NUMBER      = (0,   255, 255)
+COLOR_HEADER_BG   = (0,   0,   0  )
+COLOR_HEADER_TEXT = (255, 255, 255)
 
 # Mandatory path handling from project instructions 
 GAME_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -286,12 +294,14 @@ while running:
     for row in grid:
         for tile in row:
             tile.draw(screen)
-    font = pygame.font.SysFont('Arial', 24, bold=True)
-    life_text = font.render(f"LIVES: {lives}", True, (255, 0, 0))
-    # Position it at the top left (or wherever fits your screen)
-    screen.blit(life_text, (10, 10))
-
-    pygame.draw.rect(screen, (0,0,0), (0,0, SCREEN_WIDTH, HEADER_HEIGHT)) # Clear header area with black
+    pygame.draw.rect(screen, COLOR_HEADER_BG, (0, 0, SCREEN_WIDTH, HEADER_HEIGHT))
+    
+    header_labels = [
+        f"LIVES: {lives}",
+        f"SCORE: {score}",
+        f"TIMER: {elapsed}s",        # fixed label
+        f"MINES LEFT: {mines_left}",
+    ]
 
     elapsed = 0
     if start_ticks:
@@ -301,10 +311,30 @@ while running:
             elapsed = (pygame.time.get_ticks() - start_ticks) // 1000
     mines_left = count_mines_remaining()
 
-    font = pygame.font.SysFont("Arial", 18, bold=True)
-    stats_str = f"LIVES: {lives}  SCORE: {score}  TIME:elapsed {elapsed}s"
-    text_surf = font.render(stats_str, True, (255, 255, 255))
-    screen.blit(text_surf, (10, (HEADER_HEIGHT - text_surf.get_height()) // 2)) # Center text vertically in header
+# 3. Adaptive font sizing:
+chosen_surfaces = None
+chosen_gap = 5
+for size in [16, 14, 12]:
+    f = pygame.font.SysFont("Arial", size, bold=True)
+    surfs = [f.render(t, True, COLOR_HEADER_TEXT)
+             for t in header_labels]
+    total_w = sum(s.get_width() for s in surfs)
+    gap = (SCREEN_WIDTH - 20 - total_w) / 3
+    if gap >= 8:
+        chosen_surfaces, chosen_gap = surfs, gap
+        break
+if chosen_surfaces is None:
+    f = pygame.font.SysFont("Arial", 12, bold=True)
+    chosen_surfaces = [f.render(t, True, COLOR_HEADER_TEXT)
+                       for t in header_labels]
+    tw = sum(s.get_width() for s in chosen_surfaces)
+    chosen_gap = max(0, SCREEN_WIDTH - 20 - tw) / 3
+
+x = 10
+for surf in chosen_surfaces:
+    screen.blit(surf,
+        (x, (HEADER_HEIGHT - surf.get_height()) // 2))
+    x += surf.get_width() + chosen_gap
 
 
     pygame.display.flip()
