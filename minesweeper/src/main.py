@@ -164,7 +164,6 @@ def trigger_game_over():
     global game_over, end_ticks
     for row in grid:
         for t in row:
-            if t in row:
                 if t.is_mine:
                     t.is_revealed = True
     game_over = True
