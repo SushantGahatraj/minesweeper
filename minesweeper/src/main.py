@@ -258,7 +258,7 @@ while running:
                 
                 # 2. Check if we are inside the grid
                 if 0 <= r < ROWS and 0 <= c < COLS:
-                    target_tile = grid[r][c]
+                    tile = grid[r][c]
                     
                     # 3. SUCCESS: Detonate correctly flagged mines
                 if tile.is_mine and not tile.is_revealed:
