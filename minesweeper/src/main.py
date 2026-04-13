@@ -208,6 +208,15 @@ def get_tile_under_mouse(mx, my):
 def count_flagged():
     #Count how many tiles the player has flagged.
     return sum(1 for row in grid for t in row if t.is_flagged)
+
+def count_total_mines():
+    #Return the total number of mines actually places on the board.
+    return sum(1 for row in grid for t in row if t.is_mine)
+
+def count_mines_remaining():
+    #Calculate how many mines are left based on total mines and flagged tiles.
+    return sum(1 for row in grid for t in row if t.is_mine and not t.is_flagged)
+
 while running:
     screen.fill((0, 0, 0)) # Clear screen with black
     
