@@ -174,29 +174,40 @@ def reveal_all_mines():
 
      
 def trigger_game_over():
+    '''Handles game over state: reveals all mines and stops the timer.'''
     global game_over, end_ticks
-    for row in grid:
-        for t in row:
-                if t.is_mine:
-                    t.is_revealed = True
+    reveal_all_mines()
     game_over = True
     if end_ticks is None and start_ticks is not None:
         end_ticks = pygame.time.get_ticks()            
 
 
-def count_mines_remaining():
-    return sum(1 for row in grid for t in row if t.is_mine and not (t.is_revealed or t.is_flagged))
 
 def reset_game():
+    '''Resets the game state to start a new game.'''
     global grid, score, lives, start_ticks, end_ticks, game_over, first_click
     grid = [[Tile(r, c, TILE_SIZE) for c in range(COLS)] for r in range(ROWS)]
     score = 0
     lives = START_LIVES
+    first_click = True
     start_ticks = None
     end_ticks = None
     game_over = False
-    first_click = True
+    
+    #Rebuild the grid
+    grid = [[Tile(r, c, TILE_SIZE) for c in range(COLS)] for r in range(ROWS)]
+    
+def get_tile_under_mouse(mx, my):
+    '''Returns the tile under the given mouse coordinates, or None if out of bounds.'''
+    col = mx // TILE_SIZE
+    row = (my - HEADER_HEIGHT) // TILE_SIZE
+    if in_bounds(row, col):
+        return grid[row][col] , row, col
+    return None, None, None
 
+def count_flagged():
+    #Count how many tiles the player has flagged.
+    return sum(1 for row in grid for t in row if t.is_flagged)
 while running:
     screen.fill((0, 0, 0)) # Clear screen with black
     
