@@ -274,89 +274,78 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+
         if game_over:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
                     reset_game()
-                if event.key in (pygame.K_q, pygame.K_ESCAPE):
-                    running = False
+                if event.key == pygame.K_q or event.key == pygame.K_ESCAPE:
+                   running = False
             continue  # Skip the rest of the loop if game is over
         
         # Add your Right-Click Flagging logic here
         if event.type == pygame.MOUSEBUTTONDOWN:
             mx, my = event.pos
-            c = mx // TILE_SIZE
-            r = (my - HEADER_HEIGHT) // TILE_SIZE #udjusting the mouse postiion to account for header height
-
-            if 0 <= r < ROWS and 0 <= c < COLS:
-                tile = grid[r][c]
-            else:
+            tile, r, c = get_tile_under_mouse(mx, my)
+            if tile is None:
                 continue
 
             if event.button == 1:  # Left Click
-                    if not tile.is_flagged and not tile.is_revealed:
+                    if tile.is_flagged and tile.is_revealed:
+                        continue
                         #First click should never be mine
-                        if first_click:
-                            place_mines(r, c) 
-                            first_click = False
-                            start_ticks = pygame.time.get_ticks()
-
-
-                        tile.is_revealed = True
+                    if first_click:
+                        place_mines(r, c) 
+                        first_click = False
+                        start_ticks = pygame.time.get_ticks()
+                    tile.is_revealed = True
                         
-                        if tile.is_mine:
-                            lives -= 1
-                            print(f"BOOM! You hit a mine. Lives left: {lives}")
-                            if lives <= 0:
-                                trigger_game_over()
+                    if tile.is_mine:
+                        lives -= 1
+                        print(f"BOOM! You hit a mine. Lives left: {lives}")
+                        tile.is_revealed = True
+                    if lives <= 0:
+                        trigger_game_over()
 
-                        else:
-                            score += 1 # +1 for every safe reveal
-                            if tile.adjacent_mines == 0:
-                                reveal_empty_tiles(r, c)
+                    else:
+                        score += 1 # +1 for every safe reveal
+                        if tile.adjacent_mines == 0:
+                            reveal_empty_tiles(r, c)
 
-                    
-                        if lives <= 0:
-                         game_over = True
-                        end_ticks = pygame.time.get_ticks()
-
-                        for row in grid:
-                            for t in row:
-                                if t.is_mine:
-                                    t.is_revealed = True
-
-
-            
+           
             elif event.button == 3: # Right Click (FLAG)
                 if not tile.is_revealed:
                     tile.is_flagged = not tile.is_flagged
 
-            # Adding Spacebar Detonation logic here
-            # --- STEP 4: DETONATION LOGIC ---
+
+            # Adding Spacebar Detonation logic here            
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
-                # 1. Get mouse position and subtract the header
                 mx, my = pygame.mouse.get_pos()
-                c = mx // TILE_SIZE  
-                r = (my - HEADER_HEIGHT) // TILE_SIZE 
-                
-                # 2. Check if we are inside the grid
-                if 0 <= r < ROWS and 0 <= c < COLS:
-                    tile = grid[r][c]
-                    
-                    # 3. SUCCESS: Detonate correctly flagged mines
+                tile, r, c = get_tile_under_mouse(mx, my)
+                if tile is None:
+                    continue
+
+               # If the tile under the cursor is a mine, allow a safe detonation
+               # whether or not it's flagged. This reveals the 3x3 (including
+               # the targeted tile) without penalizing the player.
+               # Only allow detonation if the mine is still hidden. If the
+               # mine has already been revealed (player clicked it earlier),
+               # pressing SPACE should do nothing.
+
                 if tile.is_mine and not tile.is_revealed:
-                    score += 1   # +1 for the mine itself
+                    #Award an extra point for correctly identifying a mine with SPACE, even if it wasn't flagged  
+                    score += 1
                     for i in range(r - 1, r + 2):
                         for j in range(c - 1, c + 2):
                             if in_bounds(i, j):
                                 t = grid[i][j]
                                 if not t.is_revealed and not t.is_mine:
                                     score += 1
-                                    t.is_revealed = True
-                                    t.is_flagged  = False
-                    tile.is_flagged  = False
-                    tile.is_revealed = True   # reveal the mine too
+                                t.is_revealed = True
+                                t.is_flagged  = False
+                    #ensure the detonated mine itself is revealed and unflagged
+                    tile.is_flagged  = False                  
                 else:
                     if first_click:   # mines not placed yet — ignore
                         continue
@@ -365,41 +354,21 @@ while running:
                         tile.is_flagged = False
                     if lives <= 0:
                         trigger_game_over()
+        #Allow restart or quit when game is over
+        if game_over:
+            if event.key == pygame.K_r:
+                reset_game()
+            if event.key == pygame.K_q or event.key == pygame.K_ESCAPE:
+                running = False        
                     
     # Draw the grid
     for row in grid:
         for tile in row:
             tile.draw(screen)
-    pygame.draw.rect(screen, COLOR_HEADER_BG, (0, 0, SCREEN_WIDTH, HEADER_HEIGHT))
-    
-
-# 3. Adaptive font sizing:
-chosen_surfaces = None
-chosen_gap = 5
-for size in [16, 14, 12]:
-    f = pygame.font.SysFont("Arial", size, bold=True)
-    surfs = [f.render(t, True, COLOR_HEADER_TEXT)
-             for t in header_labels]
-    total_w = sum(s.get_width() for s in surfs)
-    gap = (SCREEN_WIDTH - 20 - total_w) / 3
-    if gap >= 8:
-        chosen_surfaces, chosen_gap = surfs, gap
-        break
-if chosen_surfaces is None:
-    f = pygame.font.SysFont("Arial", 12, bold=True)
-    chosen_surfaces = [f.render(t, True, COLOR_HEADER_TEXT)
-                       for t in header_labels]
-    tw = sum(s.get_width() for s in chosen_surfaces)
-    chosen_gap = max(0, SCREEN_WIDTH - 20 - tw) / 3
-
-x = 10
-for surf in chosen_surfaces:
-    screen.blit(surf,
-        (x, (HEADER_HEIGHT - surf.get_height()) // 2))
-    x += surf.get_width() + chosen_gap
 
 
     pygame.display.flip()
 
 pygame.quit()
 
+sys.exit()
