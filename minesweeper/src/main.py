@@ -79,31 +79,27 @@ class Tile: #Creating a Tile class
                 flag_rect = pygame.Rect(self.rect.x + 10, self.rect.y + 10, TILE_SIZE - 20, TILE_SIZE - 20)
                 pygame.draw.rect(surface, COLOR_FLAG, flag_rect)
 
-# Game Settings
-ROWS, COLS = 10, 10
-TILE_SIZE = 40
+#Building the board as a 2D list of Tile objects
 grid = [[Tile(r, c, TILE_SIZE) for c in range(COLS)] for r in range(ROWS)]
 
-
-
-first_click = True
-running = True
-
 def in_bounds(r, c):
+    '''Returns True if the given row and column are within the grid bounds.'''
     return 0 <= r < ROWS and 0 <= c < COLS
 
 def calculate_numbers():
     for r in range(ROWS):
         for c in range(COLS):
-            if grid[r][c].is_mine:
+            tile = grid[r][c]
+            if tile.is_mine:
+                tile.adjacent_mines = 0
                 continue
             # Check all 8 neighbors
             count = 0
-            for i in range(max(0, r-1), min(ROWS, r+2)):
-                for j in range(max(0, c-1), min(COLS, c+2)):
-                    if grid[i][j].is_mine:
+            for i in range(r - 1, r + 2):
+                for j in range(c - 1, c + 2):
+                    if in_bounds(i,j) and grid[i][j].is_mine:
                         count += 1
-            grid[r][c].adjacent_mines = count
+            tile.adjacent_mines = count
 
 def reveal_empty_tiles(r,c):
     stack = [(r,c)]
