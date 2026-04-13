@@ -45,7 +45,9 @@ lives = START_LIVES
 first_click = True
 start_ticks = None # Will be set on first click to start the timer
 end_ticks = None #used to stop timer on game over
+game_won = False #tracks if player won
 game_over = False #tracks if game ended
+
 
 class Tile: #Creating a Tile class
     def __init__(self, row, col, size):
@@ -362,14 +364,23 @@ while running:
                         tile.is_flagged = False
                     if lives <= 0:
                         trigger_game_over()
+        
+        
         #Allow restart or quit when game is over
         if game_over:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
                     reset_game()
-            if event.key == pygame.K_q or event.type == pygame.K_ESCAPE:
-                running = False        
-                    
+                elif event.key == pygame.K_q or event.type == pygame.K_ESCAPE:
+                    running = False     
+
+    # Win condition check
+    if not game_over and not first_click and count_mines_remaining() == 0:
+        game_won = True
+        game_over = True
+        if end_ticks is None and start_ticks is not None:
+            end_ticks = pygame.time.get_ticks()        
+
     # Draw the grid
     for row in grid:
         for tile in row:
@@ -387,9 +398,9 @@ while running:
         text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
         screen.blit(text, text_rect)
 
-        # Restart text
+        # Restart or Quit instructions
         small_font = pygame.font.SysFont("Arial", 20)
-        restart_text = small_font.render("Press R to Restart", True, (255, 255, 255))
+        restart_text = small_font.render("Press R to Restart  |  ESC to Quit", True, (255, 255, 255))
         restart_rect = restart_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
         screen.blit(restart_text, restart_rect)
 
