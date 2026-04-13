@@ -11,14 +11,6 @@ SCREEN_WIDTH = COLS * TILE_SIZE
 SCREEN_HEIGHT = ROWS * TILE_SIZE + HEADER_HEIGHT
 MINE_COUNT = 15
 START_LIVES = 3
-COLOR_HIDDEN      = (180, 180, 180)
-COLOR_REVEALED    = (20,  20,  20 )
-COLOR_BORDER      = (80,  80,  80 )
-COLOR_MINE        = (255, 0,   0  )
-COLOR_FLAG        = (255, 165, 0  )
-COLOR_NUMBER      = (0,   255, 255)
-COLOR_HEADER_BG   = (0,   0,   0  )
-COLOR_HEADER_TEXT = (255, 255, 255)
 
 # Mandatory path handling from project instructions 
 GAME_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -33,9 +25,23 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Chain Reaction Minesweeper")
 clock = pygame.time.Clock()
 
+#Colors and fonts
+COLOR_HIDDEN = (180, 180, 180)
+COLOR_REVEALED = (20, 20, 20)
+COLOR_BORDER = (80, 80, 80)
+COLOR_MINE = (255, 0, 0)
+COLOR_FLAG = (255, 165, 0)
+COLOR_NUMBER = (0, 255, 255)
+COLOR_HEADER_BG = (0, 0, 0)
+COLOR_HEADER_TEXT = (255, 255, 255)
+FONT = pygame.font.SysFont("Arial", 12, bold=True)
+NUMBER_FONT = pygame.font.SysFont("Arial", 24, bold=True)
+
+
 #Initalize Stats
 score = 0
 lives = START_LIVES
+first_click = True
 start_ticks = None # Will be set on first click to start the timer
 end_ticks = None #used to stop timer on game over
 game_over = False #tracks if game ended
@@ -51,12 +57,8 @@ class Tile: #Creating a Tile class
         self.adjacent_mines = 0
 
     def draw(self, surface):
-        # 1. Background Color (Hidden = Gray, Revealed = Black)
-        if not self.is_revealed:
-            color = (180, 180, 180) 
-        else:
-            color = (20, 20, 20)    
-            
+        # 1. Base color: Hidden or Revealed
+        color = COLOR_REVEALED if self.is_revealed else COLOR_HIDDEN 
         pygame.draw.rect(surface, color, self.rect)
         pygame.draw.rect(surface, (80, 80, 80), self.rect, 1) # Thin dark border
 
