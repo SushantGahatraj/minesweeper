@@ -287,7 +287,7 @@ while running:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
                     reset_game()
-                if event.key == pygame.K_q or event.key == pygame.K_ESCAPE:
+                elif event.key == pygame.K_q or event.key == pygame.K_ESCAPE:
                    running = False
             continue  # Skip the rest of the loop if game is over
         
@@ -364,9 +364,10 @@ while running:
                         trigger_game_over()
         #Allow restart or quit when game is over
         if game_over:
-            if event.key == pygame.K_r:
-                reset_game()
-            if event.key == pygame.K_q or event.key == pygame.K_ESCAPE:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r:
+                    reset_game()
+            if event.key == pygame.K_q or event.type == pygame.K_ESCAPE:
                 running = False        
                     
     # Draw the grid
