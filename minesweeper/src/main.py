@@ -221,7 +221,7 @@ while running:
                     if not tile.is_flagged and not tile.is_revealed:
                         #First click should never be mine
                         if first_click:
-                            place_mines(grid, r, c) 
+                            place_mines(r, c) 
                             first_click = False
                             start_ticks = pygame.time.get_ticks()
 
@@ -296,13 +296,6 @@ while running:
             tile.draw(screen)
     pygame.draw.rect(screen, COLOR_HEADER_BG, (0, 0, SCREEN_WIDTH, HEADER_HEIGHT))
     
-    header_labels = [
-        f"LIVES: {lives}",
-        f"SCORE: {score}",
-        f"TIMER: {elapsed}s",        # fixed label
-        f"MINES LEFT: {mines_left}",
-    ]
-
     elapsed = 0
     if start_ticks:
         if game_over and end_ticks:
@@ -310,6 +303,15 @@ while running:
         else:
             elapsed = (pygame.time.get_ticks() - start_ticks) // 1000
     mines_left = count_mines_remaining()
+
+    header_labels = [
+        f"LIVES: {lives}",
+        f"SCORE: {score}",
+        f"TIMER: {elapsed}s",        # fixed label
+        f"MINES LEFT: {mines_left}",
+    ]
+
+   
 
 # 3. Adaptive font sizing:
 chosen_surfaces = None
