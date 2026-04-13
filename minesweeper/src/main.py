@@ -25,6 +25,10 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Chain Reaction Minesweeper")
 clock = pygame.time.Clock()
 
+pygame.mixer.init()
+sound_mine_hit = pygame.mixer.Sound(get_asset_path("mine_hit.wav"))
+sound_detonate = pygame.mixer.Sound(get_asset_path("mine_detonate.wav"))
+
 #Colors and fonts
 COLOR_HIDDEN = (180, 180, 180)
 COLOR_REVEALED = (20, 20, 20)
@@ -312,6 +316,7 @@ while running:
                         
                     if tile.is_mine:
                         lives -= 1
+                        sound_mine_hit.play()
                         print(f"BOOM! You hit a mine. Lives left: {lives}")
                         tile.is_revealed = True
                     if lives <= 0:
@@ -346,6 +351,7 @@ while running:
                 if tile.is_mine and not tile.is_revealed:
                     #Award an extra point for correctly identifying a mine with SPACE, even if it wasn't flagged  
                     score += 1
+                    sound_detonate.play()
                     for i in range(r - 1, r + 2):
                         for j in range(c - 1, c + 2):
                             if in_bounds(i, j):
