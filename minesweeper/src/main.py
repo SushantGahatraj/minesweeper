@@ -164,6 +164,14 @@ def place_mines(start_r, start_c):
        if placed >= mine_count:
            break
        calculate_numbers()
+
+def reveal_all_mines():
+    '''Reveals all mines on the grid. Used for game over.'''
+    for row in grid:
+        for t in row:
+                if t.is_mine:
+                    t.is_revealed = True
+
      
 def trigger_game_over():
     global game_over, end_ticks
