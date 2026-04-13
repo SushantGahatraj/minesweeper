@@ -57,29 +57,28 @@ class Tile: #Creating a Tile class
         self.adjacent_mines = 0
 
     def draw(self, surface):
-        # 1. Base color: Hidden or Revealed
+        # Base color: Hidden or Revealed
         color = COLOR_REVEALED if self.is_revealed else COLOR_HIDDEN 
         pygame.draw.rect(surface, color, self.rect)
         pygame.draw.rect(surface, (80, 80, 80), self.rect, 1) # Thin dark border
 
-        # 2. Show contents ONLY if revealed
+        
         if self.is_revealed:
             if self.is_mine:
                 # Clean Red Mine (No diagonal line)
-                pygame.draw.circle(surface, (255, 0, 0), self.rect.center, 15)
-            elif self.adjacent_mines > 0:
-                # Show numbers (Only if greater than 0)
-                font = pygame.font.SysFont('Arial', 24, bold=True)
-                text = font.render(str(self.adjacent_mines), True, (0, 255, 255))
-                # Centering the text slightly
-                text_rect = text.get_rect(center=self.rect.center)
-                surface.blit(text, text_rect)
-            # If adjacent_mines is 0, it does nothing (stays blank black)
+                pygame.draw.circle(surface, COLOR_MINE, self.rect.center, TILE_SIZE // 3)
 
-        # 3. Flags (Orange for visibility)
-        elif self.is_flagged:
-            flag_rect = pygame.Rect(self.rect.x + 10, self.rect.y + 10, 20, 20)
-            pygame.draw.rect(surface, (255, 165, 0), flag_rect)
+            elif self.adjacent_mines > 0:
+                text = NUMBER_FONT.render(str(self.adjacent_mines), True, COLOR_NUMBER)
+                surface.blit(text, text.get_rect(center=self.rect.center))
+
+        
+        else:
+            #flag shown only on hidden tiles
+            if self.is_flagged:
+                flag_rect = pygame.Rect(self.rect.x + 10, self.rect.y + 10, TILE_SIZE - 20, TILE_SIZE - 20)
+                pygame.draw.rect(surface, COLOR_FLAG, flag_rect)
+
 # Game Settings
 ROWS, COLS = 10, 10
 TILE_SIZE = 40
