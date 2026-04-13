@@ -36,6 +36,7 @@ COLOR_HEADER_BG = (0, 0, 0)
 COLOR_HEADER_TEXT = (255, 255, 255)
 FONT = pygame.font.SysFont("Arial", 12, bold=True)
 NUMBER_FONT = pygame.font.SysFont("Arial", 24, bold=True)
+GAME_OVER_FONT = pygame.font.SysFont("Arial", 48, bold=True)
 
 
 #Initalize Stats
@@ -163,7 +164,7 @@ def place_mines(start_r, start_c):
 
        if placed >= mine_count:
            break
-       calculate_numbers()
+    calculate_numbers()
 
 def reveal_all_mines():
     '''Reveals all mines on the grid. Used for game over.'''
@@ -215,7 +216,14 @@ def count_total_mines():
 
 def count_mines_remaining():
     #Calculate how many mines are left based on total mines and flagged tiles.
-    return sum(1 for row in grid for t in row if t.is_mine and not t.is_flagged)
+    return sum(
+        1 for row in grid for t in row
+        if t.is_mine and not (t.is_revealed or t.is_flagged)
+    )
+
+chosen_surfaces = None
+chosen_font = FONT
+chosen_gap = 5
 
 #Main Loop
 running = True
@@ -291,7 +299,7 @@ while running:
                 continue
 
             if event.button == 1:  # Left Click
-                    if tile.is_flagged and tile.is_revealed:
+                    if tile.is_flagged or tile.is_revealed:
                         continue
                         #First click should never be mine
                     if first_click:
@@ -366,6 +374,23 @@ while running:
         for tile in row:
             tile.draw(screen)
 
+    if game_over:
+        # Dark overlay (optional but nice)
+        overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+        overlay.set_alpha(150)
+        overlay.fill((0, 0, 0))
+        screen.blit(overlay, (0, 0))
+
+        # GAME OVER text
+        text = GAME_OVER_FONT.render("GAME OVER", True, (255, 0, 0))
+        text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+        screen.blit(text, text_rect)
+
+        # Restart text
+        small_font = pygame.font.SysFont("Arial", 20)
+        restart_text = small_font.render("Press R to Restart", True, (255, 255, 255))
+        restart_rect = restart_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
+        screen.blit(restart_text, restart_rect)
 
     pygame.display.flip()
 
