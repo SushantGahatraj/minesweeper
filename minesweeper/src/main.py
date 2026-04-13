@@ -217,9 +217,24 @@ def count_mines_remaining():
     #Calculate how many mines are left based on total mines and flagged tiles.
     return sum(1 for row in grid for t in row if t.is_mine and not t.is_flagged)
 
+#Main Loop
+running = True
 while running:
-    screen.fill((0, 0, 0)) # Clear screen with black
+    clock.tick(60) # Limit to 60 FPS
+    screen.fill((60, 60, 60)) # Clear screen with dark gray
     
+    #Draw header background
+    pygame.draw.rect(screen, COLOR_HEADER_BG, (0, 0, SCREEN_WIDTH, HEADER_HEIGHT))
+
+    #Timer (freeze when game over using end_ticks)
+    elapsed = 0
+    if start_ticks:
+        end_time = end_ticks if end_ticks is not None else pygame.time.get_ticks()
+        elapsed = (end_time - start_ticks) // 1000
+    
+    #Show how many mines remains unidentified (not revealed and not flagged)
+    mines_left = count_mines_remaining()
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -321,22 +336,6 @@ while running:
             tile.draw(screen)
     pygame.draw.rect(screen, COLOR_HEADER_BG, (0, 0, SCREEN_WIDTH, HEADER_HEIGHT))
     
-    elapsed = 0
-    if start_ticks:
-        if game_over and end_ticks:
-            elapsed = (end_ticks - start_ticks) // 1000
-        else:
-            elapsed = (pygame.time.get_ticks() - start_ticks) // 1000
-    mines_left = count_mines_remaining()
-
-    header_labels = [
-        f"LIVES: {lives}",
-        f"SCORE: {score}",
-        f"TIMER: {elapsed}s",        # fixed label
-        f"MINES LEFT: {mines_left}",
-    ]
-
-   
 
 # 3. Adaptive font sizing:
 chosen_surfaces = None
