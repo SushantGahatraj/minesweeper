@@ -234,6 +234,42 @@ while running:
     
     #Show how many mines remains unidentified (not revealed and not flagged)
     mines_left = count_mines_remaining()
+    #Header labels with dynamic mine count and timer
+    header_labels = [
+        f"LIVES: {lives}",
+        f"SCORE: {score}",
+        f"TIMER: {elapsed}s",
+        f"MINES LEFT: {mines_left}"
+    ]
+    candidate_sizes = [16, 14, 12]  
+    chosen_gap = 5
+    for size in candidate_sizes:
+        f = pygame.font.SysFont("Arial", size, bold=True)
+        surfs = [f.render(txt, True, COLOR_HEADER_TEXT) for txt in header_labels]
+        total_w = sum(s.get_width() for s in surfs)
+        total_space = SCREEN_WIDTH - 20 - total_w # 20 pixels total padding (10 on each side)
+        gaps = 3
+        gap = total_space / gaps if gaps > 0 else 0
+        if gap >= 8:
+            chosen_font = f
+            chosen_surfaces = surfs
+            chosen_gap = gap
+            break
+
+         # If no large size fit, use the smallest candidate with computed surfaces
+    if chosen_surfaces is None:
+        f = pygame.font.SysFont("Arial", candidate_sizes[-1], bold=True)
+        chosen_font = f
+        chosen_surfaces = [f.render(txt, True, COLOR_HEADER_TEXT) for txt in header_labels]
+        total_w = sum(s.get_width() for s in chosen_surfaces)
+        total_space = max(0, SCREEN_WIDTH - 20 - total_w)
+        chosen_gap = total_space / 3 if total_space > 0 else 5
+
+    # Position items with equal gap starting at 10px
+    x = 10
+    for surf in chosen_surfaces:
+        screen.blit(surf, (x, (HEADER_HEIGHT - surf.get_height()) // 2))
+        x += surf.get_width() + chosen_gap    
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
