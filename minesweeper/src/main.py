@@ -22,7 +22,7 @@ def get_asset_path(filename: str) -> str:
 # Initialize Pygame
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Chain Reaction Minesweeper")
+pygame.display.set_caption("Detonator Minesweeper")
 clock = pygame.time.Clock()
 
 pygame.mixer.init()
@@ -263,7 +263,9 @@ while running:
         elapsed = (end_time - start_ticks) // 1000
     
     #Show how many mines remains unidentified (not revealed and not flagged)
-    mines_left = count_mines_remaining()
+
+    mines_left = sum(1 for row in grid for t in row if t.is_mine and not t.is_revealed)
+
     #Header labels with dynamic mine count and timer
     header_labels = [
         f"LIVES: {lives}",
@@ -397,11 +399,16 @@ while running:
                     running = False     
 
     # Win condition check
-    if not game_over and not first_click and count_mines_remaining() == 0:
-        game_won = True
-        game_over = True
-        if end_ticks is None and start_ticks is not None:
-            end_ticks = pygame.time.get_ticks()        
+    if not game_over and not first_click:
+        unrevealed_safe = sum(
+            1 for row in grid for t in row
+            if not t.is_mine and not t.is_revealed
+    )
+        if unrevealed_safe == 0:
+            game_won = True
+            game_over = True
+            if end_ticks is None and start_ticks is not None:
+                end_ticks = pygame.time.get_ticks()        
 
     # Draw the grid
     for row in grid:
