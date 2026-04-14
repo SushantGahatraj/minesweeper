@@ -191,8 +191,7 @@ def trigger_game_over():
 
 
 def reset_game():
-    '''Resets the game state to start a new game.'''
-    global grid, score, lives, start_ticks, end_ticks, game_over, first_click
+    global grid, score, lives, start_ticks, end_ticks, game_over, first_click, game_won, best_score, best_time
     grid = [[Tile(r, c, TILE_SIZE) for c in range(COLS)] for r in range(ROWS)]
     score = 0
     lives = START_LIVES
@@ -200,6 +199,8 @@ def reset_game():
     start_ticks = None
     end_ticks = None
     game_over = False
+    game_won = False
+    best_score, best_time = load_highscore()
     
     #Rebuild the grid
     grid = [[Tile(r, c, TILE_SIZE) for c in range(COLS)] for r in range(ROWS)]
@@ -226,6 +227,21 @@ def count_mines_remaining():
         1 for row in grid for t in row
         if t.is_mine and not (t.is_revealed or t.is_flagged)
     )
+HIGHSCORE_PATH = os.path.join(GAME_PATH, "highscore.txt")
+
+def load_highscore():
+    try:
+        with open(HIGHSCORE_PATH, "r") as f:
+            parts = f.read().strip().split(",")
+            return int(parts[0]), int(parts[1])
+    except:
+        return 0, 999
+
+def save_highscore(score, time):
+    with open(HIGHSCORE_PATH, "w") as f:
+        f.write(f"{score},{time}")
+
+best_score, best_time = load_highscore()
 
 chosen_surfaces = None
 chosen_font = FONT
@@ -393,21 +409,32 @@ while running:
             tile.draw(screen)
 
     if game_over:
-        # Dark overlay (optional but nice)
         overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
         overlay.set_alpha(150)
         overlay.fill((0, 0, 0))
         screen.blit(overlay, (0, 0))
 
-        # GAME OVER text
-        text = GAME_OVER_FONT.render("GAME OVER", True, (255, 0, 0))
-        text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
-        screen.blit(text, text_rect)
-
-        # Restart or Quit instructions
         small_font = pygame.font.SysFont("Arial", 20)
-        restart_text = small_font.render("Press R to Restart  |  ESC to Quit", True, (255, 255, 255))
-        restart_rect = restart_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
+
+        if game_won:
+            title_text = GAME_OVER_FONT.render("YOU WIN!", True, (0, 255, 0))
+        else:
+            title_text = GAME_OVER_FONT.render("GAME OVER", True, (255, 0, 0))
+        title_rect = title_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 60))
+        screen.blit(title_text, title_rect)
+
+        final_time = (end_ticks - start_ticks) // 1000 if end_ticks and start_ticks else 0
+        summary_text = small_font.render(f"Score: {score}  |  Time: {final_time}s", True, (255, 255, 255))
+        summary_rect = summary_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+        screen.blit(summary_text, summary_rect)
+
+        if score >= best_score and game_won:
+            best_text = small_font.render("New Best!  🏆", True, (255, 215, 0))
+            best_rect = best_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 30))
+            screen.blit(best_text, best_rect)
+
+        restart_text = small_font.render("Press R to Restart  |  ESC to Quit", True, (180, 180, 180))
+        restart_rect = restart_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 65))
         screen.blit(restart_text, restart_rect)
 
     pygame.display.flip()
