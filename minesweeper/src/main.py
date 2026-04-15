@@ -30,6 +30,8 @@ sound_mine_hit = pygame.mixer.Sound(get_asset_path("mine_hit.wav"))
 sound_detonate = pygame.mixer.Sound(get_asset_path("mine_detonate.wav"))
 sound_reveal_single = pygame.mixer.Sound(get_asset_path("reveal_single.wav"))
 sound_reveal_chain = pygame.mixer.Sound(get_asset_path("reveal_chain.wav"))
+sound_win = pygame.mixer.Sound(get_asset_path("win.wav"))
+sound_game_over = pygame.mixer.Sound(get_asset_path("game_over.wav"))
 
 #Colors and fonts
 COLOR_HIDDEN = (180, 180, 180)
@@ -187,6 +189,8 @@ def trigger_game_over():
     global game_over, end_ticks
     reveal_all_mines()
     game_over = True
+    pygame.mixer.stop()  # Stop all sounds before playing game over sound
+    sound_game_over.play()
     if end_ticks is None and start_ticks is not None:
         end_ticks = pygame.time.get_ticks()            
 
@@ -411,6 +415,7 @@ while running:
         if unrevealed_safe == 0:
             game_won = True
             game_over = True
+            sound_win.play()
             if end_ticks is None and start_ticks is not None:
                 end_ticks = pygame.time.get_ticks()        
 
