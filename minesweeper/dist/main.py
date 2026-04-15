@@ -26,6 +26,7 @@ pygame.display.set_caption("Detonator Minesweeper")
 clock = pygame.time.Clock()
 
 pygame.mixer.init()
+'''Game Sounds'''
 sound_mine_hit = pygame.mixer.Sound(get_asset_path("mine_hit.wav"))
 sound_detonate = pygame.mixer.Sound(get_asset_path("mine_detonate.wav"))
 sound_reveal_single = pygame.mixer.Sound(get_asset_path("reveal_single.wav"))
@@ -34,6 +35,7 @@ sound_win = pygame.mixer.Sound(get_asset_path("win.wav"))
 sound_game_over = pygame.mixer.Sound(get_asset_path("game_over.wav"))
 
 #Colors and fonts
+'''Defined colors for different tile states and UI elements.'''
 COLOR_HIDDEN = (180, 180, 180)
 COLOR_REVEALED = (20, 20, 20)
 COLOR_BORDER = (80, 80, 80)
@@ -48,6 +50,7 @@ GAME_OVER_FONT = pygame.font.SysFont("Arial", 48, bold=True)
 
 
 #Initalize Stats
+'''Variables to track game state, score, lives, and timing.'''
 score = 0
 lives = START_LIVES
 first_click = True
@@ -58,6 +61,7 @@ game_over = False #tracks if game ended
 
 
 class Tile: #Creating a Tile class
+    '''Represents a single tile on the Minesweeper grid, with properties for its position, state, and appearance.'''
     def __init__(self, row, col, size):
         self.row = row
         self.col = col
@@ -68,6 +72,7 @@ class Tile: #Creating a Tile class
         self.adjacent_mines = 0
 
     def draw(self, surface):
+        '''Draws the tile on the given surface, showing different visuals based on whether it's hidden, revealed, flagged, or contains a mine.'''
         # Base color: Hidden or Revealed
         color = COLOR_REVEALED if self.is_revealed else COLOR_HIDDEN 
         pygame.draw.rect(surface, color, self.rect)
@@ -98,6 +103,7 @@ def in_bounds(r, c):
     return 0 <= r < ROWS and 0 <= c < COLS
 
 def calculate_numbers():
+    '''Calculates the number of adjacent mines for each tile and updates their adjacent_mines property.'''
     for r in range(ROWS):
         for c in range(COLS):
             tile = grid[r][c]
@@ -113,6 +119,7 @@ def calculate_numbers():
             tile.adjacent_mines = count
 
 def reveal_empty_tiles(r,c):
+    '''Reveals all connected empty tiles (with 0 adjacent mines) starting from the given row and column. Uses a stack-based approach to avoid recursion limits.'''
     stack = [(r,c)]
     visited = set()
 
@@ -137,6 +144,7 @@ def reveal_empty_tiles(r,c):
                
 
 def place_mines(start_r, start_c):
+    '''Places mines on the grid, ensuring that the first clicked tile and its neighbors are not mines.'''
     excluded = {(start_r, start_c)}
     for i in range(start_r - 1, start_r + 2):
        for j in range(start_c - 1, start_c + 2):
@@ -146,7 +154,7 @@ def place_mines(start_r, start_c):
     possible = [(r, c) for r in range(ROWS) for c in range(COLS) if (r, c) not in excluded]
     mine_count = min(MINE_COUNT, len(possible))
     max_attempts = 100
-    for attempt in range(max_attempts):
+    for _ in range(max_attempts):
        # clear any previous mines
        for r in range(ROWS):
            for c in range(COLS):
@@ -197,6 +205,7 @@ def trigger_game_over():
 
 
 def reset_game():
+    ''''Resets the game state to start a new game, including score, lives, timer, and grid.'''
     global grid, score, lives, start_ticks, end_ticks, game_over, first_click, game_won, best_score, best_time
     grid = [[Tile(r, c, TILE_SIZE) for c in range(COLS)] for r in range(ROWS)]
     score = 0
@@ -220,15 +229,15 @@ def get_tile_under_mouse(mx, my):
     return None, None, None
 
 def count_flagged():
-    #Count how many tiles the player has flagged.
+    '''Counts how many tiles the player has flagged.'''
     return sum(1 for row in grid for t in row if t.is_flagged)
 
 def count_total_mines():
-    #Return the total number of mines actually places on the board.
+    '''Returns the total number of mines actually placed on the board.'''
     return sum(1 for row in grid for t in row if t.is_mine)
 
 def count_mines_remaining():
-    #Calculate how many mines are left based on total mines and flagged tiles.
+    '''Calculates how many mines are left based on total mines and flagged tiles.'''
     return sum(
         1 for row in grid for t in row
         if t.is_mine and not (t.is_revealed or t.is_flagged)
@@ -236,6 +245,7 @@ def count_mines_remaining():
 HIGHSCORE_PATH = os.path.join(GAME_PATH, "highscore.txt")
 
 def load_highscore():
+    '''Loads the high score and best time from a file. Returns (score, time) or (0, 999) if no valid data is found.'''
     try:
         with open(HIGHSCORE_PATH, "r") as f:
             parts = f.read().strip().split(",")
@@ -244,6 +254,7 @@ def load_highscore():
         return 0, 999
 
 def save_highscore(score, time):
+    '''Saves the high score and time to a file.'''
     with open(HIGHSCORE_PATH, "w") as f:
         f.write(f"{score},{time}")
 
@@ -296,6 +307,7 @@ while running:
 
          # If no large size fit, use the smallest candidate with computed surfaces
     if chosen_surfaces is None:
+        '''If none of the larger font sizes fit, use the smallest candidate size and compute surfaces again.'''
         f = pygame.font.SysFont("Arial", candidate_sizes[-1], bold=True)
         chosen_font = f
         chosen_surfaces = [f.render(txt, True, COLOR_HEADER_TEXT) for txt in header_labels]
@@ -310,10 +322,12 @@ while running:
         x += surf.get_width() + chosen_gap    
 
     for event in pygame.event.get():
+        '''Event handling for quitting, clicking tiles, flagging, and detonating mines. Also includes logic to ignore inputs when the game is over, allowing only restart or quit.'''
         if event.type == pygame.QUIT:
             running = False
 
         if game_over:
+            '''If the game is over, only allow restart or quit. Ignore other inputs.'''
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
                     reset_game()
@@ -323,6 +337,7 @@ while running:
         
         # Add your Right-Click Flagging logic here
         if event.type == pygame.MOUSEBUTTONDOWN:
+            '''Handles mouse clicks for revealing tiles with left-click and flagging with right-click. Also includes logic for the first click to ensure it is never a mine.'''
             mx, my = event.pos
             tile, r, c = get_tile_under_mouse(mx, my)
             if tile is None:
@@ -415,6 +430,7 @@ while running:
         if unrevealed_safe == 0:
             game_won = True
             game_over = True
+            pygame.mixer.stop()
             sound_win.play()
             if end_ticks is None and start_ticks is not None:
                 end_ticks = pygame.time.get_ticks()        
@@ -425,6 +441,7 @@ while running:
             tile.draw(screen)
 
     if game_over:
+        '''Draws the game over overlay with final score, time, and options to restart or quit. Also shows a special message if the player achieved a new best score.'''
         overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
         overlay.set_alpha(150)
         overlay.fill((0, 0, 0))
