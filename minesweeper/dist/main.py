@@ -3,13 +3,6 @@ import os
 import random
 import sys
 
-# Mandatory path handling 
-GAME_PATH = os.path.dirname(os.path.abspath(__file__))
-
-def get_asset_path(filename: str) -> str:
-    '''Returns the path to an asset file, given its filename.'''
-    return os.path.join(GAME_PATH, "assets", filename)
-
 #Game Settings
 ROWS, COLS = 10,10
 TILE_SIZE = 40
@@ -19,16 +12,26 @@ SCREEN_HEIGHT = ROWS * TILE_SIZE + HEADER_HEIGHT
 MINE_COUNT = 15
 START_LIVES = 3
 
+# Mandatory path handling from project instructions 
+GAME_PATH = os.path.dirname(os.path.abspath(__file__))
+
+def get_asset_path(filename: str) -> str:
+    '''Returns the path to an asset file, given its filename.'''
+    return os.path.join(GAME_PATH, "assets", filename)
+
 # Initialize Pygame
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Detonator Minesweeper")
 clock = pygame.time.Clock()
 
-#Sounds 
 pygame.mixer.init()
 sound_mine_hit = pygame.mixer.Sound(get_asset_path("mine_hit.wav"))
 sound_detonate = pygame.mixer.Sound(get_asset_path("mine_detonate.wav"))
+sound_reveal_single = pygame.mixer.Sound(get_asset_path("reveal_single.wav"))
+sound_reveal_chain = pygame.mixer.Sound(get_asset_path("reveal_chain.wav"))
+sound_win = pygame.mixer.Sound(get_asset_path("win.wav"))
+sound_game_over = pygame.mixer.Sound(get_asset_path("game_over.wav"))
 
 #Colors and fonts
 COLOR_HIDDEN = (180, 180, 180)
@@ -186,6 +189,8 @@ def trigger_game_over():
     global game_over, end_ticks
     reveal_all_mines()
     game_over = True
+    pygame.mixer.stop()  # Stop all sounds before playing game over sound
+    sound_game_over.play()
     if end_ticks is None and start_ticks is not None:
         end_ticks = pygame.time.get_ticks()            
 
@@ -332,19 +337,21 @@ while running:
                         first_click = False
                         start_ticks = pygame.time.get_ticks()
                     tile.is_revealed = True
-                        
+                    
                     if tile.is_mine:
                         lives -= 1
                         sound_mine_hit.play()
                         print(f"BOOM! You hit a mine. Lives left: {lives}")
-                        tile.is_revealed = True
-                    if lives <= 0:
-                        trigger_game_over()
+                        if lives <= 0:
+                            trigger_game_over()
 
                     else:
-                        score += 1 # +1 for every safe reveal
+                        score += 1
                         if tile.adjacent_mines == 0:
+                            sound_reveal_chain.play()
                             reveal_empty_tiles(r, c)
+                        else:
+                            sound_reveal_single.play()
 
            
             elif event.button == 3: # Right Click (FLAG)
@@ -408,6 +415,7 @@ while running:
         if unrevealed_safe == 0:
             game_won = True
             game_over = True
+            sound_win.play()
             if end_ticks is None and start_ticks is not None:
                 end_ticks = pygame.time.get_ticks()        
 
