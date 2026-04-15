@@ -333,22 +333,21 @@ while running:
                         first_click = False
                         start_ticks = pygame.time.get_ticks()
                     tile.is_revealed = True
-                        
+                    
                     if tile.is_mine:
                         lives -= 1
                         sound_mine_hit.play()
                         print(f"BOOM! You hit a mine. Lives left: {lives}")
-                        tile.is_revealed = True
-                    if lives <= 0:
-                        trigger_game_over()
+                        if lives <= 0:
+                            trigger_game_over()
 
                     else:
                         score += 1
                         if tile.adjacent_mines == 0:
-                            sound_reveal_chain.play()  # chain reaction
+                            sound_reveal_chain.play()
                             reveal_empty_tiles(r, c)
                         else:
-                            sound_reveal_single.play()  # single reveal
+                            sound_reveal_single.play()
 
            
             elif event.button == 3: # Right Click (FLAG)
