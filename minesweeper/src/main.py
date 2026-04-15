@@ -28,6 +28,8 @@ clock = pygame.time.Clock()
 pygame.mixer.init()
 sound_mine_hit = pygame.mixer.Sound(get_asset_path("mine_hit.wav"))
 sound_detonate = pygame.mixer.Sound(get_asset_path("mine_detonate.wav"))
+sound_reveal_single = pygame.mixer.Sound(get_asset_path("reveal_single.wav"))
+sound_reveal_chain = pygame.mixer.Sound(get_asset_path("reveal_chain.wav"))
 
 #Colors and fonts
 COLOR_HIDDEN = (180, 180, 180)
@@ -341,9 +343,12 @@ while running:
                         trigger_game_over()
 
                     else:
-                        score += 1 # +1 for every safe reveal
+                        score += 1
                         if tile.adjacent_mines == 0:
+                            sound_reveal_chain.play()  # chain reaction
                             reveal_empty_tiles(r, c)
+                        else:
+                            sound_reveal_single.play()  # single reveal
 
            
             elif event.button == 3: # Right Click (FLAG)
